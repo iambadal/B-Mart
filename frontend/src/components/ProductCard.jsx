@@ -23,10 +23,10 @@ const item = {
   return (
     <Motion.div
       variants={item}
-      className=" w-full max-w-64 font-funnel bg-white rounded-2xl pb-3 border border-gray-400/20 shadow transition duration-300 hover:shadow-2xl z-0 cursor-pointer "
+      className="product-card w-full max-w-64 font-funnel bg-white rounded-2xl pb-3 border border-gray-400/20 shadow transition duration-300 hover:shadow-2xl z-0 cursor-pointer "
       onClick={() => navigate(`/product/${product._id}`)}
     >
-      <div className=" relative flex flex-col justify-center items-center p-4 bg-gray-50 rounded-t-2xl border-b border-gray-400/20 ">
+        <div className="product-card-image relative flex flex-col justify-center items-center p-4 bg-gray-50 rounded-t-2xl border-b border-gray-400/20 ">
         <div className="w-full absolute top-3 flex flex-row-reverse justify-between items-center">
           {new Date(product.createdAt).getDate() === new Date().getDate() &&
             newProduct && (

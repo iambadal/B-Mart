@@ -29,8 +29,8 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100 p-4 font-poppins">
-      <section className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+    <main className="auth-page min-h-screen flex items-center justify-center bg-gray-100 p-4 font-poppins">
+      <section className="auth-panel w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="mb-3 text-2xl font-semibold text-gray-800">Verify your email</h1>
         <p className="mb-6 text-gray-600">{message}</p>
         {!token && (

@@ -22,7 +22,7 @@ const CategoryGrid = () => {
   const Navigate = useNavigate();
 
   return (
-    <section className=" max-sm:px-3 px-6 py-8 bg-linear-to-b from-[#eef2ff] to-[#f4f4f8]">
+    <section className="category-section max-sm:px-3 px-6 py-8 bg-linear-to-b from-[#eef2ff] to-[#f4f4f8]">
       <h2 className="max-sm:text-xl text-2xl font-bold mb-4">
         Shop by Category
       </h2>
@@ -35,7 +35,7 @@ const CategoryGrid = () => {
             viewport={{once: true}}
             key={cat.id}
             onClick={() => Navigate(`/category/${cat.name?.split(" ")[0]}`)}
-            className="relative left-1/2 -translate-x-1/2 w-fit h-fit p-2 text-center bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg active:shadow-lg"
+            className="category-card relative left-1/2 -translate-x-1/2 w-fit h-fit p-2 text-center bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg active:shadow-lg"
           >
             <img
               src={cat.image}

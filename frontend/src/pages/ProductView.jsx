@@ -81,7 +81,7 @@ const ProductDetail = () => {
   return (
     <>
       <Navbar searchbar={false} />
-      <div className=" relative min-h-screen max-sm:p-3 p-6 mt-16 bg-white bg-blue-3000 font-poppins ">
+      <div className="product-detail-page relative min-h-screen max-sm:p-3 p-6 mt-16 bg-white bg-blue-3000 font-poppins ">
         <div className=" grid xl:grid-cols-2 gap-3 max-sm:gap-0 mb-8">
           {/* Product Images */}
           <div className=" w-full h-fit flex flex-col items-center gap-3 bg-green-3000 ">

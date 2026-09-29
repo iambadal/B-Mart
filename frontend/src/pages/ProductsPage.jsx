@@ -67,7 +67,7 @@ const ProductsPage = () => {
         searchTerm={filters.search}
         setSearchTerm={(e) => handleSearch(e)}
       />
-      <div className=" mt-18 min-h-screen w-full bg-gray-200">
+      <div className="catalog-page mt-18 min-h-screen w-full bg-gray-200">
         {/* Products */}
         <div className=" flex flex-row max-sm:flex-col gap-3 p-3 max-sm:p-2">
           {/* Filter */}

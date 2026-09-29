@@ -27,11 +27,11 @@ const ProfileLayout = () => {
   };
 
   return (
-    <section className=" flex justify-center p-3">
+    <section className="profile-shell flex justify-center p-3">
       <Navbar />
       <div className="relative w-full max-w-7xl mt-18 flex flex-row gap-4">
         <aside
-          className={` max-sm:fixed top-20 left-0 z-40 flex flex-col gap-4 font-poppins ${
+          className={`profile-sidebar max-sm:fixed top-20 left-0 z-40 flex flex-col gap-4 font-poppins ${
             openSidebar
               ? "max-sm:ml-0 bg-white rounded-md"
               : "max-sm:-ml-[300px]"
@@ -146,7 +146,7 @@ const ProfileLayout = () => {
             </button>
           </div>
         </aside>
-        <main className=" w-full p-4 rounded-md bg-white shadow">
+        <main className="profile-content w-full p-4 rounded-md bg-white shadow">
           <Outlet context={[accountLogout]} />
         </main>
       </div>

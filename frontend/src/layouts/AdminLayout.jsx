@@ -27,7 +27,7 @@ const AdminLayout = () => {
 
   return (
     <>
-      <div className="relative max-h-screen w-full flex bg-gray-900 overflow-hidden">
+      <div className="admin-shell relative max-h-screen w-full flex bg-gray-900 overflow-hidden">
         <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} logout={accountLogout} />
         <div className=" relative flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
           <Header />

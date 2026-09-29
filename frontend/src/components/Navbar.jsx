@@ -50,7 +50,7 @@ const Navbar = ({
     <>
       {/* Navbar */}
       <nav
-        className={` w-full flex items-center justify-between px-4 md:px-6 py-3 max-sm:shadow-none shadow-xl font-funnel text-[#334e86] z-50 transition-transform duration-500 ${
+        className={`site-nav w-full flex items-center justify-between px-4 md:px-8 py-3 max-sm:shadow-none shadow-xl font-funnel text-[#334e86] z-50 transition-transform duration-500 ${
           isSticky
             ? "fixed top-0 left-0 bg-white"
             : "absolute top-0 left-0 bg-white "
@@ -61,8 +61,8 @@ const Navbar = ({
           to={"/"}
           className="flex items-center gap-2 mr-4 text-[20px] md:text-2xl font-bold text-[#334e86]"
         >
-          <img src="/vite.svg" alt="B-Mart Logo" className="w-8 h-8 rounded-md shadow-sm" />
-          B-Mart
+          <span className="brand-mark"><FaOpencart aria-hidden="true" /></span>
+          <span>B-Mart<span className="brand-period">.</span></span>
         </Link>
 
         {/* Desktop Search */}
@@ -73,7 +73,7 @@ const Navbar = ({
               <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg inset-shadow-sm inset-shadow-gray-400/50 focus:outline-none "
+                className="nav-search-input w-full pl-10 pr-4 py-2.5 rounded-lg inset-shadow-sm inset-shadow-gray-400/50 focus:outline-none "
                 value={searchTerm}
                 onChange={setSearchTerm}
                 autoFocus={true}
@@ -161,7 +161,7 @@ const Navbar = ({
                 <input
                   type="text"
                   placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg inset-shadow-sm inset-shadow-gray-400/50 focus:outline-none "
+                  className="nav-search-input w-full pl-10 pr-4 py-2.5 rounded-lg inset-shadow-sm inset-shadow-gray-400/50 focus:outline-none "
                   autoFocus={true}
                   value={searchTerm}
                   onChange={setSearchTerm}

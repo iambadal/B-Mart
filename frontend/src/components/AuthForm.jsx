@@ -12,7 +12,7 @@ const AuthForm = ({ isLogin, handleChange, onSubmit, formData, msg }) => {
   const navigate = useNavigate();
 
   return (
-    <section className="bg-linear-to-b from-[#b7eaac] to-[#f4f4f8] min-h-screen w-full flex flex-col justify-center">
+    <section className="auth-page bg-linear-to-b from-[#b7eaac] to-[#f4f4f8] min-h-screen w-full flex flex-col justify-center">
       <div className=" flex flex-row items-center justify-evenly p-2.5">
         <div className="max-xl:hidden text-center ">
           {isLogin ? (
@@ -67,7 +67,7 @@ const AuthForm = ({ isLogin, handleChange, onSubmit, formData, msg }) => {
           initial={{ opacity: 0, y: "100px" }}
           animate={{ opacity: 1, y: "0px" }}
           transition={{ delay: 0.3 }}
-          className="bg-[#fbfbfb] px-6 py-3 rounded-3xl shadow-2xl w-full max-w-[420px] border-b-4 border-r-4 border-[#e5e4ef] font-funnel "
+          className="auth-panel bg-[#fbfbfb] px-6 py-3 rounded-3xl shadow-2xl w-full max-w-[420px] border-b-4 border-r-4 border-[#e5e4ef] font-funnel "
         >
           <h2 className="text-center font-bold text-xl text-[#314884] mb-8 mt-4">
             {isLogin ? "Login" : "Register"}

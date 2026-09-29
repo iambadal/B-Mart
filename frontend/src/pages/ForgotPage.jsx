@@ -68,13 +68,13 @@ const ForgotPage = () => {
   };
 
   return (
-    <section className="bg-linear-to-b from-[#b7eaac] to-[#f4f4f8] min-h-screen w-full flex flex-col items-center justify-evenly">
+    <section className="auth-page bg-linear-to-b from-[#b7eaac] to-[#f4f4f8] min-h-screen w-full flex flex-col items-center justify-evenly">
       <Motion.form
         onSubmit={handelSubmit}
         initial={{ opacity: 0.5, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ ease: "circOut" }}
-        className="bg-[#fbfbfb] px-6 py-3 rounded-3xl shadow-2xl w-full max-w-[420px] h-fit border-b-4 border-r-4 border-[#e5e4ef] text-center font-funnel "
+        className="auth-panel bg-[#fbfbfb] px-6 py-3 rounded-3xl shadow-2xl w-full max-w-[420px] h-fit border-b-4 border-r-4 border-[#e5e4ef] text-center font-funnel "
       >
         <h1 className="text-center font-bold text-xl text-[#314884] mb-8 mt-4">
           {token ? " New password" : "Reset password"}

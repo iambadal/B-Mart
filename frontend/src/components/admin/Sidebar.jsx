@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, setIsOpen, logout }) => {
   return (
     <div
       ref={sidebarRef}
-      className={` min-h-screen flex flex-col flex-shrink-0 transition-all duration-300 text-white p-2.5
+      className={`admin-sidebar min-h-screen flex flex-col flex-shrink-0 transition-all duration-300 text-white p-2.5
               ${
                 isOpen
                   ? "max-md:absolute top-0 z-40 w-60 bg-gray-950/80"

@@ -12,7 +12,7 @@ const HeroBanner = () => {
   const banners = data?.banner ?? [];
 
   return (
-    <div className="relative mx-auto mt-[70px] p-2 bg-linear-to-b from-[#f4f4f8] to-[#eef2ff]">
+    <div className="hero-shell relative mx-auto mt-[70px] p-2 bg-linear-to-b from-[#f4f4f8] to-[#eef2ff]">
       <Swiper
         spaceBetween={30}
         centeredSlides={true}
@@ -30,7 +30,7 @@ const HeroBanner = () => {
         {banners.length > 0 ? (
           banners.map((banner, idx) => (
             <SwiperSlide key={banner._id || idx}>
-              <div className="relative max-sm:aspect-[3/2] aspect-[12/2] rounded-2xl m-2 overflow-hidden">
+              <div className="hero-slide relative max-sm:aspect-[3/2] aspect-[12/2] rounded-2xl m-2 overflow-hidden">
                 <img
                   src={banner.banner?.url
                     ?.replace(/^http:\/\//, "https://")
@@ -68,7 +68,7 @@ const HeroBanner = () => {
         ) : (
           /* --- THIS IS YOUR NEW CUSTOM PORTFOLIO FALLBACK BANNER --- */
           <SwiperSlide>
-            <div className="relative max-sm:aspect-[3/2] aspect-[12/2] rounded-2xl m-2 overflow-hidden bg-[#334e86]">
+            <div className="hero-slide hero-fallback relative max-sm:aspect-[3/2] aspect-[12/2] rounded-2xl m-2 overflow-hidden bg-[#334e86]">
               <div className="w-full h-full absolute inset-0 flex flex-col justify-center items-center text-white px-4">
                 <div className="text-center">
                   <h2 className="max-sm:text-2xl text-4xl font-bold text-white tracking-wide">

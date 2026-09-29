@@ -15,8 +15,8 @@ const CartPage = () => {
   );
 
   return (
-    <section className="bg-linear-to-b from-[#b7eaac] to-[#f4f4f8] min-h-screen w-full p-2.5 overflow-y-auto scroll-smooth">
-      <div className="p-6 max-sm:p-3 max-w-3xl mx-auto max-sm:rounded-xl rounded-3xl shadow bg-white">
+    <section className="cart-page bg-linear-to-b from-[#b7eaac] to-[#f4f4f8] min-h-screen w-full p-2.5 overflow-y-auto scroll-smooth">
+      <div className="cart-panel p-6 max-sm:p-3 max-w-3xl mx-auto max-sm:rounded-xl rounded-3xl shadow bg-white">
         <h1 className="max-sm:text-xl text-2xl font-bold mb-4">
           Shopping Cart
         </h1>

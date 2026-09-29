@@ -26,7 +26,7 @@ const ProductList = ({ title, products = null, newProduct }) => {
   );
 
   return (
-    <section className=" max-sm:px-3 max-sm:py-4 px-6 py-8 ">
+    <section className="product-section max-sm:px-3 max-sm:py-4 px-6 py-8 ">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
       <div className=" w-full flex items-center justify-center">
         <Motion.div

@@ -28,7 +28,7 @@ export default function OrderDetailPage() {
   };
 
   return (
-    <section className="mx-auto max-w-4xl p-4 font-poppins">
+    <section className="order-detail-page mx-auto max-w-4xl p-4 font-poppins">
       <Link to="/user/orders" className="text-sm text-blue-600 hover:underline">← Back to my orders</Link>
       <div className="mt-4 flex flex-wrap items-start justify-between gap-3 rounded-xl bg-gray-50 p-5">
         <div>

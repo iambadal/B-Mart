@@ -177,9 +177,9 @@ const CheckoutPage = () => {
   };
 
   return (
-    <div className=" p-6 max-sm:p-3 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="checkout-page p-6 max-sm:p-3 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* left - Order Summary */}
-      <div className="bg-gray-50 shadow p-6 rounded-xl">
+      <div className="checkout-summary bg-gray-50 shadow p-6 rounded-xl">
         <h2 className="text-xl font-bold mb-4">Order Summary</h2>
         {checkoutItems.length === 0 ? (
           <p>No items in cart.</p>
@@ -209,7 +209,7 @@ const CheckoutPage = () => {
       {/* right - Shipping Form */}
       <form
         onSubmit={handlePlaceOrder}
-        className="space-y-5 bg-white shadow p-6 rounded-xl"
+        className="checkout-form space-y-5 bg-white shadow p-6 rounded-xl"
       >
         <h2 className="text-xl font-bold mb-2">Shipping Details</h2>
 
