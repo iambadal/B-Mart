@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { createOrderAndReserve, deleteOrders, fetchOrders, recentOrders, updateOrderStatus } from "../api/OrdersAPI";
+import { createOrderAndReserve, deleteOrders, fetchOrders, recentOrders, updateOrderStatus, getCustomerOrder, cancelCustomerOrder } from "../api/OrdersAPI";
 
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
@@ -23,6 +23,25 @@ export const useRecentOrders = (token) => {
     queryKey: ["recent-orders", token],
     queryFn: recentOrders,
   })
+};
+
+export const useCustomerOrder = (orderId, token) => useQuery({
+  queryKey: ["customerOrder", orderId, token],
+  queryFn: () => getCustomerOrder(orderId, token),
+  enabled: Boolean(orderId && token),
+});
+
+export const useCancelCustomerOrder = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, accessToken }) => cancelCustomerOrder(orderId, accessToken),
+    onSuccess: (data, variables) => {
+      if (data.status === "success") {
+        queryClient.invalidateQueries({ queryKey: ["customerOrder", variables.orderId] });
+        queryClient.invalidateQueries({ queryKey: ["userOrders"] });
+      }
+    },
+  });
 };
 
 export const useFetchOrders = (filters, page, limit, sort, token) => {

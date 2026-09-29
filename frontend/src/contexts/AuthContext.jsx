@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [disabled, setDisabled] = useState(true);
   const navigate = useNavigate();
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   // 1. Initial Authentication Check
   useEffect(() => {
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
         setAccessToken(data?.accessToken);
         setUser(data.user);
         setDisabled(false);
-      } catch (err) {
+      } catch {
         console.log("Session expired or no active session found.");
         setAccessToken(null);
         setUser(null);
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     initAuth();
-  }, [navigate]);
+  }, [navigate, BACKEND_URL]);
 
   // 2. Attach Access Token to ALL future Axios requests
   useEffect(() => {
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => axios.interceptors.response.eject(interceptor);
-  }, [navigate]);
+  }, [navigate, BACKEND_URL]);
 
   return (
     <AuthContext.Provider

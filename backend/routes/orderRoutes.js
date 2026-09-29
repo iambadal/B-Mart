@@ -1,11 +1,13 @@
 import express from "express";
 import { authCheck, isAdmin } from "../middlewares/authMiddleware.js";
-import { allOrders, createOrderAndReserve, recentOrders, updateOrders, deleteOrders } from "../controllers/orderController.js";
+import { allOrders, createOrderAndReserve, recentOrders, updateOrders, deleteOrders, getCustomerOrder, cancelCustomerOrder } from "../controllers/orderController.js";
 
 const router = express.Router();
 
 // Create new order.
 router.post("/", authCheck, createOrderAndReserve);
+router.get("/mine/:id", authCheck, getCustomerOrder);
+router.post("/mine/:id/cancel", authCheck, cancelCustomerOrder);
 
 // Get recent orders.
 router.get("/recent", authCheck, isAdmin, recentOrders);

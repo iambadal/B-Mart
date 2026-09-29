@@ -16,13 +16,13 @@ const container = {
 const ProductList = ({ title, products = null, newProduct }) => {
   const { user } = useAuth();
 
-  const { data: productData, isLoading } = useFetchProduct(
+  const { data: productData } = useFetchProduct(
     {},
     0,
     10,
     newProduct ? "" : "-rating,-numReviews",
     user?.role,
-    false
+    !products
   );
 
   return (
@@ -37,11 +37,11 @@ const ProductList = ({ title, products = null, newProduct }) => {
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10 max-sm:gap-5"
         >
           {products
-            ? products.items?.map((p) => (
+            ? [...new Map((products.items || []).map((p) => [p._id, p])).values()]?.map((p) => (
                 <ProductCard key={p._id} product={p} newProduct={newProduct} />
               ))
             : productData.items?.length > 0 &&
-              productData.items?.map((p) => (
+              [...new Map(productData.items.map((p) => [p._id, p])).values()]?.map((p) => (
                 <ProductCard key={p._id} product={p} newProduct={newProduct} />
               ))}
         </Motion.div>

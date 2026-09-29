@@ -41,7 +41,6 @@ const ProductDetail = () => {
 
   const {
     data: product,
-    isLoading,
     isFetched,
   } = useFetchProductById(productId);
 
@@ -53,7 +52,7 @@ const ProductDetail = () => {
     }
   }, [product?.tags]);
 
-  const { data: similarProducts, isFetching } = useFetchProduct(
+  const { data: similarProducts } = useFetchProduct(
     filters,
     0,
     5,
@@ -66,7 +65,7 @@ const ProductDetail = () => {
   const gallery = useMemo(() => {
     if (!product?.images?.length) return null;
     return <ProductGallery images={product.images} product={product} />;
-  }, [product?.images]);
+  }, [product]);
 
   const handleBuyNow = () => {
     // Direct Checkout without cart.
@@ -306,7 +305,7 @@ const ProductDetail = () => {
             {similarProducts?.items?.length === 0 ? (
               <p>No products available</p>
             ) : (
-              similarProducts.items.map((item, idx) => {
+              [...new Map((similarProducts?.items || []).map((item) => [item._id, item])).values()].map((item) => {
                 if (item._id.toString() !== productId) {
                   return (
                     <Motion.div
@@ -314,10 +313,10 @@ const ProductDetail = () => {
                       initial="hidden"
                       whileInView="show"
                       viewport={{ once: true, amount: 0.3 }}
-                      key={idx}
+                      key={item._id}
                       className=" w-64"
                     >
-                      <ProductCard key={idx} product={item} />{" "}
+                      <ProductCard product={item} />{" "}
                     </Motion.div>
                   );
                 }

@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import toRupee from "../utils/formatToRupee";
 import ProductRating from "../components/ProductRating";
 import { motion as Motion } from "motion/react";
+import { useCancelCustomerOrder } from "../Hooks/useOrders";
+import { useToast } from "d9-toast";
 
 const container = {
   hidden: {},
@@ -35,7 +37,25 @@ const OrdersPage = () => {
   const { accessToken } = useAuth();
   const limit = 3; // item per page.
   const { data, isLoading } = useFetchUserOrders(page, limit, accessToken);
+  const { mutateAsync: cancelOrder, isPending: isCancelling } = useCancelCustomerOrder();
+  const { showToast } = useToast();
   const Navigate = useNavigate();
+
+  const handleCancelOrder = async (event, orderId) => {
+    event.stopPropagation();
+    const selectedOrder = orders.find((order) => order.order_id === orderId);
+    const confirmMessage = selectedOrder?.willRefund
+      ? "Cancel this paid order and request a full refund to the original payment method?"
+      : "Cancel this order?";
+    if (!window.confirm(confirmMessage)) return;
+    const result = await cancelOrder({ orderId, accessToken });
+    showToast({
+      message: result.status === "success" ? result.message || "Order cancelled." : result.message || "Could not cancel this order.",
+      type: result.status === "success" ? "success" : "error",
+      duration: 3500,
+      closable: true,
+    });
+  };
 
   
   useEffect(() => {
@@ -63,7 +83,7 @@ const OrdersPage = () => {
               <Motion.li
                 variants={item}
                 key={order.order_id || idx}
-                onClick={() => Navigate(`/product/${order.product_id}`)}
+                onClick={() => Navigate(`/user/orders/${order.order_id}`)}
                 className=" w-full flex flex-row max-sm:flex-col gap-3 rounded-2xl bg-[#f4f4f8] overflow-hidden"
               >
                 {/* Image */}
@@ -81,9 +101,7 @@ const OrdersPage = () => {
                 {/* Details */}
                 <div className="m-4 w-full flex flex-row max-sm:flex-col justify-between gap-3">
                   <div className="flex flex-col gap-3">
-                    <h1 className=" text-sm text-gray-600">
-                      {order.name?.substring(0, 25)}...
-                    </h1>
+                    <h1 className=" text-sm text-gray-600">{order.name}</h1>
                     <p className="text-xs text-gray-500">
                       Quantity: {order?.qty}
                     </p>
@@ -93,16 +111,19 @@ const OrdersPage = () => {
                   </div>
 
                   <div className="flex flex-col gap-4">
-                    <p className=" inline-flex items-center gap-2 text-sm text-gray-600">
-                      <FaCircleDot size={18} className="text-green-600" />
-                      {`${order.status} on ${order.updatedAt?.split("T")[0]}`}
+                    <p className={`inline-flex items-center gap-2 text-sm ${order.status === "cancelled" ? "text-red-700" : "text-gray-600"}`}>
+                      <FaCircleDot size={18} className={order.status === "cancelled" ? "text-red-600" : "text-green-600"} />
+                      {`${order.status === "cancelled" ? "Cancelled" : order.status} on ${(order.cancelledAt || order.updatedAt)?.split("T")[0]}`}
                     </p>
+                    {order.status === "cancelled" && order.refundStatus && (
+                      <p className="text-xs text-gray-500">Refund: {order.refundStatus}</p>
+                    )}
                     <p className=" inline-flex items-center gap-2 text-xs text-gray-500">
                       <FaNoteSticky size={16} />{" "}
                       {order.note || "content unavailable"}
                     </p>
                     {/* Actions */}
-                    <button
+                    {order.status === "delivered" && <button
                       className=" w-fit inline-flex items-center gap-2 text-sm px-2 py-1 rounded-full text-blue-500 bg-blue-500/10 hover:bg-blue-500/20 cursor-pointer"
                       onClick={(e) =>{
                         e.stopPropagation();
@@ -113,7 +134,14 @@ const OrdersPage = () => {
                       }}
                     >
                       <FaStar size={18} /> Rate & Review
-                    </button>
+                    </button>}
+                    {order.canCancel && <button
+                      disabled={isCancelling}
+                      className="w-fit rounded-full bg-red-500/10 px-3 py-1.5 text-sm text-red-600 hover:bg-red-500/20 disabled:opacity-50"
+                      onClick={(event) => handleCancelOrder(event, order.order_id)}
+                    >
+                      {isCancelling ? "Cancelling…" : "Cancel this order"}
+                    </button>}
                   </div>
                 </div>
               </Motion.li>

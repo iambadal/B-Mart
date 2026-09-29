@@ -27,6 +27,8 @@ const paymentInfoSchema = new mongoose.Schema({
     paymentId: { type: String },  // razorpay payment_id
     signature: { type: String },  // razorpay signature.
     status: { type: String },     //  'created', 'captured', 'failed'
+    refundId: { type: String },
+    refundStatus: { type: String },
     raw: { type: mongoose.Schema.Types.Mixed }, // store raw response.
 });
 
@@ -52,6 +54,7 @@ const orderSchema = new mongoose.Schema({
     shippedAt: { type: Date },
     deliveredAt: { type: Date },
     cancelledAt: { type: Date },
+    cancellationStatus: { type: String, enum: ["processing", "failed", "completed"], default: null },
     notes: { type: String },
     reservedUntil: { type: Date },
 

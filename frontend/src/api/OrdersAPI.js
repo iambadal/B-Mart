@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_API_URL,
+    baseURL: import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
     headers: { "Content-Type": "application/json" },
     withCredentials: true, 
 });
@@ -18,6 +18,28 @@ export const createOrderAndReserve = async (data, token) => {
     } catch (error) {
         console.error("Create order and reserve error:", error);
         return error.response?.data ?? "Product order error.";
+    }
+};
+
+export const getCustomerOrder = async (orderId, token) => {
+    try {
+        const { data } = await API.get(`/api/orders/mine/${orderId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return data;
+    } catch (error) {
+        return error.response?.data || { message: "Could not fetch this order." };
+    }
+};
+
+export const cancelCustomerOrder = async (orderId, token) => {
+    try {
+        const { data } = await API.post(`/api/orders/mine/${orderId}/cancel`, {}, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return data;
+    } catch (error) {
+        return error.response?.data || { message: "Could not cancel this order." };
     }
 };
 

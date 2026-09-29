@@ -1,0 +1,12 @@
+{
+  "name": "b-mart",
+  "version": "1.0.0",
+  "private": true,
+  "description": "B-Mart full-stack e-commerce application",
+  "scripts": {
+    "dev": "concurrently -k -n API,WEB -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

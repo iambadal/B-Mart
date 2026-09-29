@@ -6,6 +6,8 @@ import Wishlist from "../models/Wishlist.js";
 import cloudinaryDestroy from "../utils/cloudinaryDestroy.js";
 import cloudinaryUpload from "../utils/cloudinaryUploader.js";
 import userDelete from "../utils/userDeletes.js";
+import sendEmail from "../utils/sendEmail.js";
+import crypto from "node:crypto";
 
 
 // GET /api/user
@@ -49,7 +51,27 @@ export const updateUser = async (req, res) => {
 
         // Update other fields.
         if (user.username !== username && username) user.username = username;
-        if (user.email !== email && email) user.email = email;
+        const normalizedEmail = email?.toLowerCase().trim();
+        if (user.email !== normalizedEmail && normalizedEmail) {
+            const emailInUse = await User.exists({ email: normalizedEmail, _id: { $ne: user._id } });
+            if (emailInUse) return res.status(409).json({ status: "failure", message: "Email already in use." });
+            const verificationToken = crypto.randomBytes(32).toString("hex");
+            user.email = normalizedEmail;
+            user.isVerified = false;
+            user.refreshToken = null;
+            user.emailVerificationToken = crypto.createHash("sha256").update(verificationToken).digest("hex");
+            user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            await user.save();
+            const verificationLink = `${process.env.FRONTEND_URL || "http://localhost:5173"}/verify-email/${verificationToken}`;
+            await sendEmail({
+                to: normalizedEmail,
+                subject: "Verify your new B-Mart email",
+                text: `Verify your new email by opening: ${verificationLink}`,
+                html: `<p><a href="${verificationLink}">Verify your new email</a></p><p>This link expires in 24 hours.</p>`,
+            });
+            res.clearCookie("refreshToken");
+            return res.status(200).json({ status: "success", message: "Profile updated. Verify your new email before your next sign in.", user });
+        }
         if (user.phone !== phone && phone) user.phone = phone;
 
         const newData = await user.save();
@@ -164,9 +186,19 @@ export const addUserProductReview = async (req, res) => {
         const { rating, comment, title } = req.body;
         const product = await Product.findById(req.params.id);
 
-        if (!rating || !comment) return res.status(404).json({ status: "failure", message: "Invalid data!" });
+        const numericRating = Number(rating);
+        if (!Number.isFinite(numericRating) || numericRating < 0.5 || numericRating > 5 || !comment?.trim() || !title?.trim()) {
+            return res.status(400).json({ status: "failure", message: "Provide a rating from 0.5 to 5, a title, and a review." });
+        }
 
         if (!product) return res.status(404).json({ status: "failure", message: "Product not found" });
+
+        const deliveredPurchase = await Order.exists({
+            user: req.user._id,
+            status: "delivered",
+            "items.product": product._id,
+        });
+        if (!deliveredPurchase) return res.status(403).json({ status: "failure", message: "You can review this product after an order containing it is delivered." });
 
 
         // check if user already reviewed.
@@ -175,17 +207,17 @@ export const addUserProductReview = async (req, res) => {
         // Reviews
         if (alreadyReviewed) {
             // Update existing review
-            alreadyReviewed.rating = Number(rating);
-            alreadyReviewed.comment = comment;
-            alreadyReviewed.title = title;
+            alreadyReviewed.rating = numericRating;
+            alreadyReviewed.comment = comment.trim();
+            alreadyReviewed.title = title.trim();
         } else {
             // Add new review
             const review = {
                 user: req.user._id,
                 name: req.user.username,
-                rating: Number(rating),
-                comment,
-                title,
+                rating: numericRating,
+                comment: comment.trim(),
+                title: title.trim(),
             };
             product.reviews.push(review);
         };
@@ -204,7 +236,7 @@ export const addUserProductReview = async (req, res) => {
 
     } catch (error) {
         console.error("Add product review error:", error);
-        res.status(500).json({ status: failure, message: "Add/update product review error." });
+        res.status(500).json({ status: "failure", message: "Add/update product review error." });
     }
 };
 
@@ -230,7 +262,7 @@ export const deleteUserProductReview = async (req, res) => {
 
     } catch (error) {
         console.error("Delete product review error:", error);
-        res.status(500).json({ status: failure, message: "Delete product review error." });
+        res.status(500).json({ status: "failure", message: "Delete product review error." });
     }
 };
 
@@ -263,6 +295,14 @@ export const getUserOrders = async (req, res) => {
             qty: order.items[0]?.qty,
             totalPrice: order.totals?.totalPrice,
             status: order.status,
+            canCancel: (
+                ["pending", "processing"].includes(order.status) && !["created", "captured"].includes(order.paymentInfo?.status)
+            ) || (
+                ["paid", "processing"].includes(order.status) && order.paymentInfo?.status === "captured" && Boolean(order.paymentInfo?.paymentId) && !["processing", "completed"].includes(order.cancellationStatus)
+            ),
+            willRefund: order.paymentInfo?.status === "captured",
+            cancelledAt: order.cancelledAt,
+            refundStatus: order.paymentInfo?.refundStatus,
             updatedAt: order.updatedAt,
             note: order.notes || "",
         }))

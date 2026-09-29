@@ -1,6 +1,7 @@
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 import mongoose from "mongoose";
+import razorpayInstance from "../config/razorpay.js";
 
 // POST /api/orders  [create order and reserve stock after successful payment]
 export const createOrderAndReserve = async (req, res) => {
@@ -50,6 +51,109 @@ export const createOrderAndReserve = async (req, res) => {
     } catch (error) {
         console.error("Create order and reserve error:", error);
         res.status(500).json({ success: false, message: "Failed to create order." });
+    }
+};
+
+// GET /api/orders/mine/:id
+export const getCustomerOrder = async (req, res) => {
+    try {
+        const order = await Order.findOne({ _id: req.params.id, user: req.user._id }).lean();
+        if (!order) return res.status(404).json({ message: "Order not found." });
+        return res.json(order);
+    } catch (error) {
+        console.error("Get customer order error:", error);
+        return res.status(500).json({ message: "Could not fetch this order." });
+    }
+};
+
+// POST /api/orders/mine/:id/cancel
+export const cancelCustomerOrder = async (req, res) => {
+    try {
+        const existing = await Order.findOne({ _id: req.params.id, user: req.user._id });
+        if (!existing) return res.status(404).json({ message: "Order not found." });
+
+        if (["shipped", "delivered", "cancelled", "refunded"].includes(existing.status)) {
+            return res.status(409).json({ message: "This order can no longer be cancelled." });
+        }
+        if (existing.cancellationStatus === "processing" || existing.cancellationStatus === "completed") {
+            return res.status(409).json({ message: "Cancellation is already being processed." });
+        }
+
+        const wasPaid = existing.paymentInfo?.status === "captured";
+        if (wasPaid) {
+            if (!existing.paymentInfo?.paymentId) {
+                return res.status(409).json({ message: "The payment reference is unavailable; contact support to cancel this order." });
+            }
+
+            const claimedOrder = await Order.findOneAndUpdate(
+                {
+                    _id: existing._id,
+                    user: req.user._id,
+                    status: { $in: ["paid", "processing"] },
+                    "paymentInfo.status": "captured",
+                    cancellationStatus: { $in: [null, "failed"] },
+                },
+                { $set: { cancellationStatus: "processing" } },
+                { new: true }
+            );
+            if (!claimedOrder) return res.status(409).json({ message: "This order can no longer be cancelled." });
+
+            let refund;
+            try {
+                refund = await razorpayInstance.payments.refund(claimedOrder.paymentInfo.paymentId, {
+                    notes: { orderId: claimedOrder._id.toString(), reason: "Customer cancellation" },
+                });
+            } catch (refundError) {
+                console.error("Razorpay refund error:", refundError);
+                if (refundError.statusCode) {
+                    await Order.updateOne(
+                        { _id: claimedOrder._id, cancellationStatus: "processing" },
+                        { $set: { cancellationStatus: "failed" } }
+                    );
+                    return res.status(502).json({ message: refundError.error?.description || "Razorpay could not create the refund. Please try again or contact support." });
+                }
+                return res.status(503).json({ message: "Refund status could not be confirmed. Cancellation is held for review; do not retry." });
+            }
+
+            const cancelledOrder = await Order.findOneAndUpdate(
+                { _id: claimedOrder._id, cancellationStatus: "processing", status: { $in: ["paid", "processing"] } },
+                { $set: {
+                    status: "cancelled",
+                    cancelledAt: new Date(),
+                    reservedUntil: null,
+                    cancellationStatus: "completed",
+                    "paymentInfo.refundId": refund.id,
+                    "paymentInfo.refundStatus": refund.status,
+                    "paymentInfo.status": "refunded",
+                } },
+                { new: true }
+            );
+            if (!cancelledOrder) {
+                return res.status(503).json({ message: "Razorpay accepted the refund, but the order update needs support review." });
+            }
+            await Promise.all(cancelledOrder.items.map(({ product, qty }) =>
+                Product.updateOne({ _id: product }, { $inc: { stock: qty } })
+            ));
+            return res.json({ status: "success", message: "Order cancelled and a full refund was requested to the original payment method.", order: cancelledOrder });
+        }
+
+        if (!["pending", "processing"].includes(existing.status) || ["created", "captured"].includes(existing.paymentInfo?.status)) {
+            return res.status(409).json({ message: "This order can no longer be cancelled." });
+        }
+        const order = await Order.findOneAndUpdate(
+            { _id: existing._id, user: req.user._id, status: { $in: ["pending", "processing"] }, "paymentInfo.status": { $nin: ["captured", "created"] } },
+            { $set: { status: "cancelled", cancelledAt: new Date(), reservedUntil: null, cancellationStatus: "completed" } },
+            { new: true }
+        );
+        if (!order) return res.status(409).json({ message: "This order can no longer be cancelled." });
+
+        await Promise.all(order.items.map(({ product, qty }) =>
+            Product.updateOne({ _id: product }, { $inc: { stock: qty } })
+        ));
+        return res.json({ status: "success", message: "Order cancelled.", order });
+    } catch (error) {
+        console.error("Cancel customer order error:", error);
+        return res.status(500).json({ message: "Could not cancel this order." });
     }
 };
 

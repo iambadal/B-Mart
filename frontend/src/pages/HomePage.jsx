@@ -21,6 +21,10 @@ export default function HomePage() {
     "",
     user?.role
   );
+  const { data: featuredProducts } = useFetchProduct({}, 0, 20, "-rating,-numReviews", user?.role);
+  const { data: newProducts } = useFetchProduct({}, 0, 30, "-createdAt", user?.role);
+  const featuredIds = new Set((featuredProducts?.items || []).slice(0, 10).map((product) => product._id));
+  const distinctNewProducts = (newProducts?.items || []).filter((product) => !featuredIds.has(product._id)).slice(0, 10);
 
   return (
     <>
@@ -29,9 +33,9 @@ export default function HomePage() {
       <HeroBanner />
       <CategoryGrid />
       <div id="featured">
-        <ProductList title="Featured Products" />
+        <ProductList title="Featured Products" products={{ items: (featuredProducts?.items || []).slice(0, 10) }} />
       </div>
-      <ProductList title="New Arrivals" newProduct={true} />
+      <ProductList title="New Arrivals" newProduct={true} products={{ items: distinctNewProducts }} />
       <Footer />
     </>
   );

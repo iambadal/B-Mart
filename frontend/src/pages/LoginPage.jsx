@@ -45,6 +45,9 @@ const LoginPage = () => {
     } else {
       // If login fails, the error response usually contains a 'message'
       setMsg(data?.message || "Login failed. Please check your credentials.");
+      if (data?.code === "EMAIL_NOT_VERIFIED") {
+        navigate("/verify-email", { state: { email: formData.email } });
+      }
     }
   };
 

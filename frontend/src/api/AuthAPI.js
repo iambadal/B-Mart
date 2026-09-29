@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000",
+    baseURL: import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
     headers: { "Content-Type": "application/json" },
     withCredentials: true,
 });
@@ -43,6 +43,24 @@ export const resetPassword = async (formData) => {
     } catch (error) {
         console.error("Reset password error:", error);
         return error.response?.data || "Reset failed";
+    }
+};
+
+export const verifyEmail = async (token) => {
+    try {
+        const { data } = await API.get(`/api/auth/verify-email/${token}`);
+        return data;
+    } catch (error) {
+        return error.response?.data || { status: "failure", message: "Email verification failed." };
+    }
+};
+
+export const resendVerification = async (email) => {
+    try {
+        const { data } = await API.post("/api/auth/resend-verification", { email });
+        return data;
+    } catch (error) {
+        return error.response?.data || { status: "failure", message: "Could not send verification email." };
     }
 };
 

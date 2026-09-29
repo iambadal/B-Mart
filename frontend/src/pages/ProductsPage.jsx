@@ -31,7 +31,7 @@ const ProductsPage = () => {
 
   const { ref, inView } = useInView();
 
-  const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
+  const { data, fetchNextPage, isFetchingNextPage, hasNextPage } =
     useFetchInfiniteProducts(
       { ...filters, search: debouncedSearchTerm },
       1, // page
@@ -53,7 +53,7 @@ const ProductsPage = () => {
       }
     };
     nextPage();
-  }, [inView, hasNextPage]);
+  }, [inView, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
     if (category) setFilters((prev) => ({ ...prev, category: [category] }));
@@ -114,11 +114,21 @@ const ProductsPage = () => {
             </>
 
             {/* Product lists */}
-            {data.pages.map((page, idx) => (
-              <Suspense fallback={<p>loading...</p>}>
-                <ProductList products={page} key={idx} />
-              </Suspense>
-            ))}
+            {(() => {
+              const seenProductIds = new Set();
+              return data.pages.map((page, idx) => {
+                const uniqueItems = (page.items || []).filter((product) => {
+                  if (seenProductIds.has(product._id)) return false;
+                  seenProductIds.add(product._id);
+                  return true;
+                });
+                return (
+                  <Suspense fallback={<p>loading...</p>} key={idx}>
+                    <ProductList products={{ ...page, items: uniqueItems }} />
+                  </Suspense>
+                );
+              });
+            })()}
 
             <div
               ref={ref}

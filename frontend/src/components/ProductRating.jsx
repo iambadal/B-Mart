@@ -16,6 +16,10 @@ const ProductRating = ({ productId, close }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (rating < 0.5 || rating > 5) {
+      showToast({ message: "Choose a rating from 0.5 to 5 stars.", type: "warning", duration: 3000, closable: true });
+      return;
+    }
     const formData = new FormData();
     formData.append("rating", rating);
     formData.append("comment", comment);
@@ -35,10 +39,13 @@ const ProductRating = ({ productId, close }) => {
               pauseOnHover: true,
               pauseOnFocusLoss: true,
             });
+            setRating(0);
+            setTitle("");
+            setComment("");
+            close();
+          } else {
+            showToast({ message: result.message || "Could not save your review.", type: "error", duration: 4000, closable: true });
           }
-          setRating(0);
-          setComment("");
-          close();
         },
       }
     );
@@ -89,7 +96,7 @@ const ProductRating = ({ productId, close }) => {
             onChange={(e) => setComment(e.target.value)}
           ></textarea>
           <button
-            disabled={isPending}
+            disabled={isPending || rating < 0.5}
             type="submit"
             className=" min-w-32 p-2 mt-4 flex items-center justify-center gap-2 text-lg bg-amber-500/70 text-amber-50 rounded-md hover:bg-amber-500/80 cursor-pointer"
           >

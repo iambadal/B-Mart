@@ -161,11 +161,10 @@ const AuthForm = ({ isLogin, handleChange, onSubmit, formData, msg }) => {
             </div>
 
             {isLogin && (
-              <p className=" text-right text-sm cursor-pointer hover:text-blue-500"
-              onClick={() => navigate("/forgot-password")}
-              >
-                Forgot password?
-              </p>
+              <div className="flex justify-between text-sm">
+                <p className="cursor-pointer hover:text-blue-500" onClick={() => navigate("/forgot-password")}>Forgot password?</p>
+                <p className="cursor-pointer hover:text-blue-500" onClick={() => navigate("/verify-email")}>Verify email</p>
+              </div>
             )}
 
             <p className="text-xs text-justify">

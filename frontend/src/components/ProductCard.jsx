@@ -58,11 +58,11 @@ const item = {
         {/* Rating and review count */}
         <div className=" absolute bottom-3 left-3 flex flex-row text-sm p-0.5 bg-white rounded-md shadow-2xs">
           <div className=" flex flex-row items-center gap-1 px-1 font-semibold ">
-            {(Math.round(product.rating * 2) / 2).toFixed(1)}{" "}
+            {product.numReviews ? (Math.round(product.rating * 2) / 2).toFixed(1) : "New"}{" "}
             <FaStar className="text-[#52be76]" />
           </div>
           <p className="px-1  my-1 border-l border-gray-400/50 font-extralight text-gray-500">
-            498
+            {product.numReviews || 0}
           </p>
         </div>
       </div>
@@ -81,7 +81,7 @@ const item = {
           Hot Deal
         </p>
       )}
-      {product.rating > 50 && (
+      {product.numReviews >= 20 && (
         <p className="w-fit bg-violet-100 text-violet-500 font-funnel font-medium text-sm my-1.5 mx-2.5 px-1.5 py-0.5 rounded-md">
           Trending
         </p>

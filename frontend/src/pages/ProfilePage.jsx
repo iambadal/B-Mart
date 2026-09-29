@@ -6,9 +6,11 @@ import { MdOutlineSecurity } from "react-icons/md";
 import { useUpdateUserData } from "../Hooks/useUser";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "d9-toast";
+import { useNavigate } from "react-router";
 
 const Profile = () => {
-  const { accessToken } = useAuth();
+  const { accessToken, setAccessToken, setUser } = useAuth();
+  const navigate = useNavigate();
   const [isEditModeOn, setIsEditModeOn] = useState({
     name: false,
     email: false,
@@ -51,10 +53,10 @@ const Profile = () => {
     await updateUserData(
       { fd: formData, accessToken },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
           showToast({
-            message: "Your data is successfully updated.",
-            type: "success",
+            message: result.message || (result.status === "success" ? "Your data is successfully updated." : "Profile update failed."),
+            type: result.status === "success" ? "success" : "error",
             duration: 3000,
             closable: true,
             progress: true,
@@ -62,6 +64,13 @@ const Profile = () => {
             pauseOnFocusLoss: true,
           });
           setIsEditModeOn({ name: false, email: false, phone: false });
+          if (result.message?.includes("Verify your new email")) {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("user");
+            setAccessToken(null);
+            setUser(null);
+            navigate("/verify-email", { state: { email: userData.email } });
+          }
           // setUserData({
           //   name: "",
           //   email: "",

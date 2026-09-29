@@ -17,7 +17,7 @@ B-Mart's backend is a Node.js and Express REST API for the B-Mart storefront. It
 
 ## Features
 
-- User registration, login, access-token authentication, refresh cookies, logout, and password reset email.
+- User registration with expiring email verification links, login, access-token authentication, refresh cookies, logout, and password reset email.
 - Product listing and detail endpoints, search/filter query handling, and admin product management.
 - Customer profile, address, review, order-history, wishlist, and banner endpoints.
 - Order creation with stock reservation and automatic release of expired reservations.
@@ -87,8 +87,10 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 # Mailtrap SMTP values used outside production
 EMAIL_HOST=sandbox.smtp.mailtrap.io
 EMAIL_PORT=2525
+EMAIL_SECURE=false
 EMAIL_USER=your_mailtrap_username
 EMAIL_PASS=your_mailtrap_password
+EMAIL_FROM="B-Mart <your_verified_sender@example.com>"
 
 # Mailtrap Sending API values used when NODE_ENV=production
 MAILTRAP_API_TOKEN=your_mailtrap_api_token
@@ -100,16 +102,21 @@ MAILTRAP_SENDER_NAME=B-Mart
 | --- | --- |
 | `NODE_ENV` | Selects development SMTP or production Mailtrap API email delivery and controls error stack output. |
 | `PORT` | HTTP listening port; defaults to `5000`. |
-| `FRONTEND_URL` | Allowed browser origin for credentialed CORS and the base URL used in password reset links. Defaults to `http://localhost:5173`. |
+| `FRONTEND_URL` | Allowed browser origin for credentialed CORS and the base URL used in password reset and email verification links. Defaults to `http://localhost:5173`. |
 | `MONGO_URI` | MongoDB connection URI. |
 | `JWT_SECRET` | Signs and verifies access tokens. Required for authentication. |
 | `JWT_REFRESH_SECRET` | Signs refresh tokens; falls back to `JWT_SECRET` when omitted. |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Server credentials for Razorpay order creation and verification. |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary credentials for image storage. |
 | `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASS` | Mailtrap SMTP settings used outside production. |
+| `EMAIL_SECURE`, `EMAIL_FROM` | Optional SMTP TLS setting and sender display address. Port `465` enables TLS automatically; Gmail SMTP requires TLS. |
 | `MAILTRAP_API_TOKEN`, `MAILTRAP_SENDER_EMAIL`, `MAILTRAP_SENDER_NAME` | Mailtrap Sending API settings used when `NODE_ENV=production`. |
 
 Do not expose backend secrets in frontend configuration or source control. The frontend uses its own `VITE_BACKEND_API_URL` and public `VITE_RAZORPAY_KEY_ID` settings.
+
+For Gmail SMTP in development, use `EMAIL_HOST=smtp.gmail.com`, `EMAIL_PORT=465`, `EMAIL_SECURE=true`, and your full Gmail address as `EMAIL_USER`. Set `EMAIL_PASS` to a Google App Password, not your regular account password. Google documents authenticated SMTP on ports 465 (SSL) and 587 (TLS); App Passwords require 2-Step Verification. [Gmail SMTP settings](https://support.google.com/a/answer/176600) · [Google App Passwords](https://support.google.com/accounts/answer/2461835).
+
+In development, email is sent by SMTP and must have `EMAIL_HOST`, `EMAIL_USER`, and `EMAIL_PASS` configured. The current local environment has none of those settings, so verification email delivery will fail until an SMTP provider is configured. If registration has already created an unverified account, open **Verify email** on the sign-in page and request another link after setting the credentials.
 
 ## Available commands
 
@@ -127,10 +134,10 @@ All application routes are mounted under `/api`. Authentication uses a bearer ac
 
 | Base path | Main operations | Access |
 | --- | --- | --- |
-| `/api/auth` | `POST /register`, `POST /login`, `GET /refresh`, `POST /forgot-pwd`, `POST /reset-pwd`, `POST /logout` | Public or refresh-cookie flow |
+| `/api/auth` | `POST /register`, `GET /verify-email/:token`, `POST /resend-verification`, `POST /login`, `GET /refresh`, `POST /forgot-pwd`, `POST /reset-pwd`, `POST /logout` | Public or refresh-cookie flow |
 | `/api/products` | `GET /`, `GET /:id`; create, update, delete, and bulk operations | Reads public; writes admin-only |
 | `/api/user` | Profile, address, reviews, personal orders, wishlist, and banners | Mostly signed in; `GET /banners` is public |
-| `/api/orders` | `POST /` creates an order and reserves stock; list, recent, update, and delete orders | Customer creation; admin order management |
+| `/api/orders` | `POST /` creates an order and reserves stock; `GET /mine/:id` fetches the signed-in customer's order; `POST /mine/:id/cancel` cancels an eligible order; list, recent, update, and delete orders | Customer order access; admin order management |
 | `/api/payment` | `POST /order`, `POST /verify` | Signed in |
 | `/api/admin` | Dashboard summaries, sales, category distribution, stock status, users, and banner management | Admin-only |
 
@@ -172,9 +179,13 @@ Express middleware → route → auth/admin checks → controller
 Key behavior:
 
 - Access tokens are checked by `authCheck`; `isAdmin` restricts admin operations to users with the `admin` role.
+- New accounts must verify an email link before sign-in. Verification links expire after 24 hours; unverified customers can request a replacement link.
+- Accounts created before email verification was added must verify once before they can sign in again; use the resend flow from the login page.
 - The refresh endpoint uses a refresh token cookie. The frontend must send credentialed requests and the backend CORS origin must match it.
 - New orders reserve inventory. A cron task runs every minute and releases expired reservations through `releaseExpiredOrders.js`.
 - Payment verification computes and checks a Razorpay signature on the server using `RAZORPAY_KEY_SECRET`.
+- Customers can cancel unpaid pending/processing orders and request a full Razorpay refund when cancelling paid orders that have not shipped. A paid order is marked cancelled only after Razorpay accepts the refund; stock is returned once.
+- Product ratings and reviews are limited to a delivered purchase and one review per customer per product. Updating or deleting a review recalculates the displayed average and review count.
 - User deletion includes a 30-day TTL index on `deletedAt`; MongoDB removes expired soft-deleted user documents after that period.
 - Uploaded files are sent to Cloudinary. Multer temporarily stores uploads under `temp/uploads` for processing.
 

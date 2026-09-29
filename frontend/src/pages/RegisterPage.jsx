@@ -21,10 +21,13 @@ const RegisterPage = () => {
     e.preventDefault();
     setMsg(null);
     const data = await register(formData);
-    console.log(data);
+    if (data.code === "EMAIL_DELIVERY_FAILED") {
+      navigate("/verify-email", { state: { email: formData.email, notice: data.message } });
+      return;
+    }
     if (data.type) {
       setMsg(data.message);
-      navigate("/login");
+      navigate("/verify-email", { state: { email: formData.email } });
     }
     setMsg(data.message);
   };

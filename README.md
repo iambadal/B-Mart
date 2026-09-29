@@ -15,7 +15,9 @@ The backend also integrates JWT authentication, Razorpay payments, Cloudinary im
 
 - Product browsing with search, categories, filters, sorting, tags, product details, and reviews.
 - Customer registration, login, password reset, profile and address management.
+- Email verification before sign-in, with expiring links and resend support.
 - Persistent cart and wishlist, order history, and checkout with Razorpay.
+- Order detail pages, eligible order cancellation, and delivered-purchase ratings.
 - Admin dashboard and tools for products, orders, users, and promotional banners.
 - Product and banner image uploads stored through Cloudinary.
 - MongoDB persistence with periodic release of expired order stock reservations.
@@ -37,46 +39,33 @@ B-Mart/
 - MongoDB, local or hosted
 - Provider credentials for Cloudinary, Razorpay, and Mailtrap for the features that use them
 
-### 1. Configure and start the backend
+### Start both services together
 
 ```bash
 cd backend
 npm install
-```
-
-Create `backend/.env` and configure the database URI, JWT secrets, and any integrations you plan to use. See the [backend configuration guide](backend/README.md#environment-configuration).
-
-Start the API:
-
-```bash
+cd ../frontend
+npm install
+cd ..
+npm install
 npm run dev
 ```
 
-By default, the API listens on `http://localhost:5000`.
+The root install adds the `concurrently` runner. Before starting, create `backend/.env` and `frontend/.env` using the [backend](backend/README.md#environment-configuration) and [frontend](frontend/README.md#environment-configuration) guides. The root `npm run dev` command starts the API and Vite server with labelled output; press `Ctrl+C` to stop both.
 
-### 2. Configure and start the frontend
+### Start either service separately
 
-In another terminal:
+```bash
+cd backend
+npm run dev
+```
 
 ```bash
 cd frontend
-npm install
-```
-
-Create `frontend/.env`:
-
-```dotenv
-VITE_BACKEND_API_URL=http://127.0.0.1:5000
-VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
-```
-
-Start the Vite development server:
-
-```bash
 npm run dev
 ```
 
-Vite prints the local storefront URL, usually `http://localhost:5173`. Set the backend's `FRONTEND_URL` to that origin so credentialed browser requests are accepted.
+By default, the API listens on `http://localhost:5000`; Vite prints its storefront URL, usually `http://localhost:5173`. Set the backend's `FRONTEND_URL` to the frontend origin so credentialed browser requests are accepted.
 
 ## Useful commands
 
@@ -90,6 +79,7 @@ Run commands from the corresponding package directory:
 | Frontend | `npm run preview` | Preview the production build locally |
 | Backend | `npm run dev` | Run API with Node watch mode |
 | Backend | `npm start` | Run API normally |
+| Repository root | `npm run dev` | Run frontend and backend together |
 
 ## Architecture
 

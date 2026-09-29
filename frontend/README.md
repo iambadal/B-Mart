@@ -23,6 +23,10 @@ B-Mart is a React single-page storefront and admin interface for the B-Mart e-co
 - Search, filter, sort, and view product details, images, and ratings.
 - Add products to a persistent browser cart and wishlist.
 - Sign up, sign in, request a password reset, and continue through checkout.
+- Verify the account email before signing in, and request a replacement verification link when needed.
+- Open order details, cancel eligible orders (with a full refund request for paid, unshipped orders), and rate purchased items after delivery.
+- Verify the account email before signing in; request another verification link if needed.
+- Open order details, review purchased items after delivery, and cancel an eligible order.
 - Pay through the Razorpay checkout flow.
 
 ### Customer account
@@ -82,7 +86,7 @@ VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `VITE_BACKEND_API_URL` | Yes for API modules | Base URL used by the Axios API clients. For local development, use the backend origin, such as `http://127.0.0.1:5000`. |
+| `VITE_BACKEND_API_URL` or `VITE_API_BASE_URL` | Yes for API modules | Backend base URL used by Axios. `VITE_BACKEND_API_URL` takes precedence; both names are supported. For local development, use `http://127.0.0.1:5000`. |
 | `VITE_RAZORPAY_KEY_ID` | For Razorpay checkout | Public Razorpay key passed to the browser checkout widget. |
 
 Restart Vite after changing environment values. These values are compiled into the client bundle: never put private keys, secrets, or database credentials in a `VITE_` variable. Keep Razorpay secret credentials in the backend environment.
@@ -120,6 +124,7 @@ Run these from `frontend/`:
 | `/user/address` | Address management | Signed in |
 | `/user/account` | Account settings | Signed in |
 | `/user/orders` | Customer orders | Signed in |
+| `/user/orders/:id` | Customer order detail | Signed in; order owner only |
 | `/user/reviews` | Customer reviews | Signed in |
 | `/user/wishlist` | Customer wishlist | Signed in |
 | `/user/help` | Help and contact | Signed in |

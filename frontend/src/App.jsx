@@ -30,6 +30,8 @@ const OrdersPage = lazy(() => import("./pages/OrdersPage"));
 const ReviewsPage = lazy(() => import("./pages/ReviewsPage"));
 const WishlistPage = lazy(() => import("./pages/WishlistPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
+const OrderDetailPage = lazy(() => import("./pages/OrderDetailPage"));
 
 
 const App = () => {
@@ -45,6 +47,8 @@ const App = () => {
                   <Route path="login" element={<LoginPage />} />
                   <Route path="forgot-password" element={<ForgotPage />} />
                   <Route path="reset-password/:token" element={<ForgotPage />} />
+                  <Route path="verify-email" element={<VerifyEmailPage />} />
+                  <Route path="verify-email/:token" element={<VerifyEmailPage />} />
                   <Route index element={<HomePage />} />
                   <Route path="cart" element={<CartPage />} />
                   <Route path="product/:id" element={<ProductDetail />} />
@@ -60,6 +64,7 @@ const App = () => {
                     <Route path="address" element={<AddressPage />} />
                     <Route path="account" element={<AccountPage />} />
                     <Route path="orders" element={<OrdersPage />} />
+                    <Route path="orders/:id" element={<OrderDetailPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="wishlist" element={<WishlistPage />} />
                     <Route path="help" element={<ContactPage/>} />

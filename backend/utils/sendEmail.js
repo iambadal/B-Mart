@@ -6,10 +6,19 @@ const sendEmail = async (options) => {
     const isProduction = process.env.NODE_ENV === "production";
 
     if (!isProduction) {
-        // For development only [ Mailtrap SMTP sandbox]
+        const missing = ["EMAIL_HOST", "EMAIL_USER", "EMAIL_PASS"].filter((key) => !process.env[key]);
+        if (missing.length) {
+            const error = new Error(`Email is not configured. Set ${missing.join(", ")} in backend/.env.`);
+            error.code = "EMAIL_CONFIGURATION";
+            throw error;
+        }
+
+        const port = Number(process.env.EMAIL_PORT || 587);
         const transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
-            port: process.env.EMAIL_PORT,
+            port,
+            secure: process.env.EMAIL_SECURE === "true" || port === 465,
+            connectionTimeout: 10000,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS,
@@ -17,7 +26,7 @@ const sendEmail = async (options) => {
         });
 
         const mailOptions = {
-            from: `"My Cart" <${process.env.EMAIL_USER}>`,
+            from: process.env.EMAIL_FROM || `"B-Mart" <${process.env.EMAIL_USER}>`,
             to: options.to,
             subject: options.subject,
             text: options.text,
@@ -26,7 +35,13 @@ const sendEmail = async (options) => {
         await transporter.sendMail(mailOptions);
         console.log("[DEV] : Email sent via Mailtrap Sandbox");
     } else {
-        // For production only [Mailtrap Sending API]
+        const missing = ["MAILTRAP_API_TOKEN", "MAILTRAP_SENDER_EMAIL", "MAILTRAP_SENDER_NAME"].filter((key) => !process.env[key]);
+        if (missing.length) {
+            const error = new Error(`Email is not configured for production. Set ${missing.join(", ")} in the backend environment.`);
+            error.code = "EMAIL_CONFIGURATION";
+            throw error;
+        }
+
         const client = new MailtrapClient({
             token: process.env.MAILTRAP_API_TOKEN,
         });

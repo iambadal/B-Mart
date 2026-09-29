@@ -3,7 +3,7 @@ import buildQuery from "../utils/buildQuery";
 
 
 const API = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_API_URL,
+    baseURL: import.meta.env.VITE_BACKEND_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
     headers: { "Content-Type": "multipart/form-data" },
     withCredentials: true, // Allow cookies & sessions to be sent.
 });

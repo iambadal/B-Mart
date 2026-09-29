@@ -20,6 +20,10 @@ export const authCheck = async (req, res, next) => {
                 return res.status(401).json({ message: "User not found" });
             }
 
+            if (!req.user.isVerified) {
+                return res.status(403).json({ message: "Verify your email to use this account." });
+            }
+
             next();
 
         } catch (error) {

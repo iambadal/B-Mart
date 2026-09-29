@@ -55,6 +55,8 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, default: null },
     address: addressSchema,
     isVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String, default: null, select: false },
+    emailVerificationExpires: { type: Date, default: null, select: false },
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
 }, { timestamps: true });
